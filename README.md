@@ -3,4 +3,10 @@
 PhaseBurn's dotfiles, managed with [`chezmoi`](https://github.com/twpayne/chezmoi).
 
 Install them with:
-    `sh -c "$(curl -fsLS get.chezmoi.io)" -- init --apply $GITHUB_USERNAME`
+    `sh -c "$(curl -fsLS get.chezmoi.io)" -- init --apply phaseburn`
+
+Once they're installed, to set up for pushing changes:
+```
+chezmoi cd
+git remote set-url origin git@github.com:phaseburn/dotfiles.git
+```
