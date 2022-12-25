@@ -1,0 +1,16 @@
+{{ $passphrase := promptStringOnce . "passphrase" "Passphrase" -}}
+{{ $email := promptStringOnce . "email" "Email Address" -}}
+{{ $name := promptStringOnce . "name" "Git Name" -}}
+
+encryption = "gpg"
+[gpg]
+    symmetric = true
+    args = ["--batch", "--passphrase", {{ $passphrase | quote }}, "--no-symkey-cache", "--quiet"]
+
+[git]
+    autoCommit = true
+    autoPush = false
+
+[data]
+    email = {{ $email | quote }}
+    name = {{ $name | quote }}
