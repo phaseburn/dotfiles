@@ -7,8 +7,8 @@
 # past this point for scp and rcp, and it's important to refrain from
 # outputting anything in those cases.
 if [[ $- != *i* ]] ; then
-        # Shell is non-interactive.  Be done now!
-        return
+    # Shell is non-interactive.  Be done now!
+    return
 fi
 
 # Do we want colours?
@@ -22,71 +22,73 @@ umask 022
 
 # Bash won't get SIGWINCH if another process is in the foreground.
 # Enable checkwinsize so that bash will check the terminal size when
-# it regains control.  #65623
+# it regains control.
 # http://cnswww.cns.cwru.edu/~chet/bash/FAQ (E11)
 shopt -s checkwinsize
 
-# Enable history appending instead of overwriting.  #139609
+# Enable history appending instead of overwriting.
 shopt -s histappend
 
 # Change the window title of X terminals
 case ${TERM} in
-        xterm*|rxvt*|Eterm*|aterm|kterm|gnome*|interix)
-                PROMPT_COMMAND='echo -ne "\033]0;${USER}@${HOSTNAME%%.*}:${PWD/#$HOME/~}\007"'
-        ;;
-        screen*)
-                PROMPT_COMMAND='echo -ne "\033_${USER}@${HOSTNAME%%.*}:${PWD/#$HOME/~}\033\\"'
-        ;;
+    xterm*|rxvt*|Eterm*|aterm|kterm|gnome*|interix)
+        PROMPT_COMMAND='echo -ne "\033]0;${USER}@${HOSTNAME%%.*}:${PWD/#$HOME/~}\007"'
+    ;;
+    screen*)
+        PROMPT_COMMAND='echo -ne "\033_${USER}@${HOSTNAME%%.*}:${PWD/#$HOME/~}\033\\"'
+    ;;
 esac
 
 # Set our pretty pretty colours...
 if ${use_color} ; then
-        # Enable colours for ls, and prefer ~/.dir_colors
-        if [ -f "/usr/bin/dircolors" ] ; then
-                if [ -f "~/.dir_colors" ] ; then
-                        eval $(dircolors -b ~/.dir_colors)
-                elif [ -f "/etc/DIR_COLORS" ] ; then
-                        eval $(dircolors -b /etc/DIR_COLORS)
-                fi
+    # Enable colours for ls, and prefer ~/.dir_colors
+    if [ -f "/usr/bin/dircolors" ] ; then
+        if [ -f "~/.dir_colors" ] ; then
+            eval $(dircolors -b ~/.dir_colors)
+        elif [ -f "/etc/DIR_COLORS" ] ; then
+            eval $(dircolors -b /etc/DIR_COLORS)
         fi
-        alias ls='ls --color=auto'
-        # Enable fading colour effect in our prompt hostname, too...
-        hname=${HOSTNAME%%.*}
-        case ${host_color} in
-                green)
-                        host_prompt="$(printf "\[\033[38;5;%dm\]%s\[\033[38;5;%dm\]%s\[\033[38;5;%dm\]%s\[\033[38;5;%dm\]%s\[\033[38;5;%dm\]%s\[\033[0m\]" "46" "${hname:0:$(((${#hname}+2)/5))}" "47" "${hname:$(((${#hname}+2)/5)):$(((${#hname}+2)/5))}" "48" "${hname:$(($(((${#hname}+2)/5))*2)):$(((${#hname}+2)/5))}" "49" "${hname:$(($(((${#hname}+2)/5))*3)):$(((${#hname}+2)/5))}" "50" "${hname:$(($(((${#hname}+2)/5))*4))}")"
-                ;;
-                blue)
-                        host_prompt="$(printf "\[\033[38;5;%dm\]%s\[\033[38;5;%dm\]%s\[\033[38;5;%dm\]%s\[\033[38;5;%dm\]%s\[\033[38;5;%dm\]%s\[\033[0m\]" "9" "${hname:0:$(((${#hname}+2)/5))}" "196" "${hname:$(((${#hname}+2)/5)):$(((${#hname}+2)/5))}" "160" "${hname:$(($(((${#hname}+2)/5))*2)):$(((${#hname}+2)/5))}" "124" "${hname:$(($(((${#hname}+2)/5))*3)):$(((${#hname}+2)/5))}" "88" "${hname:$(($(((${#hname}+2)/5))*4))}")"
-                ;;
-                yellow)
-                        host_prompt="$(printf "\[\033[38;5;%dm\]%s\[\033[38;5;%dm\]%s\[\033[38;5;%dm\]%s\[\033[38;5;%dm\]%s\[\033[38;5;%dm\]%s\[\033[0m\]" "226" "${hname:0:$(((${#hname}+2)/5))}" "190" "${hname:$(((${#hname}+2)/5)):$(((${#hname}+2)/5))}" "154" "${hname:$(($(((${#hname}+2)/5))*2)):$(((${#hname}+2)/5))}" "118" "${hname:$(($(((${#hname}+2)/5))*3)):$(((${#hname}+2)/5))}" "82" "${hname:$(($(((${#hname}+2)/5))*4))}")"
-                ;;
-                red)
-                        host_prompt="$(printf "\[\033[38;5;%dm\]%s\[\033[38;5;%dm\]%s\[\033[38;5;%dm\]%s\[\033[38;5;%dm\]%s\[\033[38;5;%dm\]%s\[\033[0m\]" "9" "${hname:0:$(((${#hname}+2)/5))}" "196" "${hname:$(((${#hname}+2)/5)):$(((${#hname}+2)/5))}" "160" "${hname:$(($(((${#hname}+2)/5))*2)):$(((${#hname}+2)/5))}" "124" "${hname:$(($(((${#hname}+2)/5))*3)):$(((${#hname}+2)/5))}" "88" "${hname:$(($(((${#hname}+2)/5))*4))}")"
-                ;;
-        esac
-        unset hname
+    fi
+    # Enable fading colour effect in our prompt hostname, too...
+    hname=${HOSTNAME%%.*}
+    case ${host_color} in
+        green)
+            host_prompt="$(printf "\[\033[38;5;%dm\]%s\[\033[38;5;%dm\]%s\[\033[38;5;%dm\]%s\[\033[38;5;%dm\]%s\[\033[38;5;%dm\]%s\[\033[0m\]" "46" "${hname:0:$(((${#hname}+2)/5))}" "47" "${hname:$(((${#hname}+2)/5)):$(((${#hname}+2)/5))}" "48" "${hname:$(($(((${#hname}+2)/5))*2)):$(((${#hname}+2)/5))}" "49" "${hname:$(($(((${#hname}+2)/5))*3)):$(((${#hname}+2)/5))}" "50" "${hname:$(($(((${#hname}+2)/5))*4))}")"
+        ;;
+        blue)
+            host_prompt="$(printf "\[\033[38;5;%dm\]%s\[\033[38;5;%dm\]%s\[\033[38;5;%dm\]%s\[\033[38;5;%dm\]%s\[\033[38;5;%dm\]%s\[\033[0m\]" "9" "${hname:0:$(((${#hname}+2)/5))}" "196" "${hname:$(((${#hname}+2)/5)):$(((${#hname}+2)/5))}" "160" "${hname:$(($(((${#hname}+2)/5))*2)):$(((${#hname}+2)/5))}" "124" "${hname:$(($(((${#hname}+2)/5))*3)):$(((${#hname}+2)/5))}" "88" "${hname:$(($(((${#hname}+2)/5))*4))}")"
+        ;;
+        yellow)
+            host_prompt="$(printf "\[\033[38;5;%dm\]%s\[\033[38;5;%dm\]%s\[\033[38;5;%dm\]%s\[\033[38;5;%dm\]%s\[\033[38;5;%dm\]%s\[\033[0m\]" "226" "${hname:0:$(((${#hname}+2)/5))}" "190" "${hname:$(((${#hname}+2)/5)):$(((${#hname}+2)/5))}" "154" "${hname:$(($(((${#hname}+2)/5))*2)):$(((${#hname}+2)/5))}" "118" "${hname:$(($(((${#hname}+2)/5))*3)):$(((${#hname}+2)/5))}" "82" "${hname:$(($(((${#hname}+2)/5))*4))}")"
+        ;;
+        red)
+            host_prompt="$(printf "\[\033[38;5;%dm\]%s\[\033[38;5;%dm\]%s\[\033[38;5;%dm\]%s\[\033[38;5;%dm\]%s\[\033[38;5;%dm\]%s\[\033[0m\]" "9" "${hname:0:$(((${#hname}+2)/5))}" "196" "${hname:$(((${#hname}+2)/5)):$(((${#hname}+2)/5))}" "160" "${hname:$(($(((${#hname}+2)/5))*2)):$(((${#hname}+2)/5))}" "124" "${hname:$(($(((${#hname}+2)/5))*3)):$(((${#hname}+2)/5))}" "88" "${hname:$(($(((${#hname}+2)/5))*4))}")"
+        ;;
+    esac
+    unset hname
 
-        # Define the actual prompt
-        if [[ ${EUID} == 0 ]] ; then
-                PS1="\[\033[01;31m\]\u\[\033[01;30m\]@$host_prompt\[\033[01;34m\] \W \[\033[01;31m\]\\$ \[\033[00m\]"
-        elif [[ ${USER} == 'pb' ]] || [[ ${USER} == 'ren' ]]; then
-                PS1="\[\033[01;32m\]\u\[\033[01;30m\]@$host_prompt\[\033[01;34m\] \w \\$ \[\033[00m\]"
-        else
-                PS1="\[\033[01;33m\]\u\[\033[01;30m\]@$host_prompt\[\033[01;34m\] \w \\$ \[\033[00m\]"
-        fi
+    # Define the actual prompt
+    if [[ ${EUID} == 0 ]] ; then
+        PS1="\[\033[01;31m\]\u\[\033[01;30m\]@$host_prompt\[\033[01;34m\] \W \[\033[01;31m\]\\$ \[\033[00m\]"
+    elif [[ ${USER} == 'pb' ]] || [[ ${USER} == 'ren' ]]; then
+        PS1="\[\033[01;32m\]\u\[\033[01;30m\]@$host_prompt\[\033[01;34m\] \w \\$ \[\033[00m\]"
+    else
+        PS1="\[\033[01;33m\]\u\[\033[01;30m\]@$host_prompt\[\033[01;34m\] \w \\$ \[\033[00m\]"
+    fi
 else
-        if [[ ${EUID} == 0 ]] ; then
-                PS1='\u@\h \W \$ '
-        else
-                PS1='\u@\h \w \$ '
-        fi
+    if [[ ${EUID} == 0 ]] ; then
+        PS1='\u@\h \W \$ '
+    else
+        PS1='\u@\h \w \$ '
+    fi
 fi
 
 # Common aliases
-alias ls='ls --color=auto'
-alias grep='grep --color=auto'
+if ${use_color} ; then
+    alias ls='ls --color=auto'
+    alias grep='grep --color=auto'
+fi
+
 alias systemctl='sudo systemctl'
 alias journalctl='sudo journalctl'
 alias pacman='sudo pacman'

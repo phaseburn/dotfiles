@@ -1,23 +1,35 @@
 # Self-contained .bash_profile
 
 # .bash_profile sourced at every login shell, and applies to the whole session.
-# Its job is to set the path, run commands that should only be run once per session such as keyrings, handle eveything required for the session and all sub-shells.
+#
+# Its job is to set the path, run commands that should only be run once per 
+# session such as keyrings, handle eveything required for the session and all 
+# sub-shells.
 
 # Test for an interactive shell.  There is no need to set anything
 # past this point for scp and rcp, and it's important to refrain from
 # outputting anything in those cases.
 if [[ $- != *i* ]] ; then
-        # Shell is non-interactive.  Be done now!
-        return
+    # Shell is non-interactive.  Be done now!
+    return
 fi
 
-# This function API is accessible to scripts in /etc/profile.d
+# These functions API are accessible to scripts in /etc/profile.d
 append_path () {
     case ":$PATH:" in
         *:"$1":*)
-                ;;
+            ;;
         *)
-                PATH="${PATH:+$PATH:}$1"
+            PATH="${PATH:+$PATH:}$1"
+    esac
+}
+
+prepend_path () {
+    case ":$PATH:" in
+        *:"$1":*)
+            ;;
+        *)
+            PATH="$1:${PATH}"
     esac
 }
 
@@ -39,47 +51,46 @@ HISTCONTROL=ignorespace
 # This way the evaluation can be short-circuited and calling whoami is
 # avoided.
 if [ "$EUID" = "0" ] || [ "$USER" = "root" ] ; then
-        PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:${ROOTPATH}"
+    PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:${ROOTPATH}"
 else
-        PATH="/usr/local/bin:/usr/bin:/bin:${PATH}"
+    PATH="/usr/local/bin:/usr/bin:/bin:${PATH}"
 fi
 export PATH
 
 # Load profiles from /etc/profile.d to take advantage of specifics of the server
 if [ -d "/etc/profile.d" ] ; then
-        for profile in /etc/profile.d/*.sh; do
-                test -r "$profile" && . "$profile"
-        done
-        unset profile
+    for profile in /etc/profile.d/*.sh; do
+        test -r "$profile" && . "$profile"
+    done
+    unset profile
 fi
 
 # SSH Agents are generally a Good Thing (tm)
 if [ -e "/usr/bin/keychain" ] ; then
-        eval $(keychain --eval --quiet --timeout 15)
+    eval $(keychain --eval --quiet --timeout 15)
 fi
 
 # Some additional paths, if they exist
-
-# If we have ~/bin, use it...
-if [ -d "$HOME/bin" ] ; then
-        PATH="$HOME/bin:${PATH}"
-fi
-
 # Check for the Android SDK
 if [ -d "/opt/android-sdk/platform-tools" ] ; then
-        #PATH="${PATH}:/opt/android-sdk/platform-tools"
-        append_path "/opt/android-sdk/platform-tools"
+    append_path "/opt/android-sdk/platform-tools"
 fi
 
-# If we have ccache, use it...
+# If we have ccache, use it... It overrides some gcc binaries, so prepend it.
 if [ -d "/usr/lib/ccache/bin" ] ; then
-        #PATH="/usr/lib/ccache/bin/:${PATH}"
-        append_path "/usr/lib/ccache/bin"
+    prepend_path "/usr/lib/ccache/bin"
+fi
+
+# If we have ~/bin, use it...
+# I like to override commands from here, so we'll prepend it so it's last.
+if [ -d "$HOME/bin" ] ; then
+    prepend_path "$HOME/bin"
 fi
 
 unset -f append_path
+unset -f prepend_path
 
 # Lastly, we call .bashrc to handle the customization that should apply to all instances of interactive bash.
 if [ -f ~/.bashrc ] ; then
-        . ~/.bashrc
+    . ~/.bashrc
 fi
