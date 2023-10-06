@@ -1,0 +1,96 @@
+# Self-contained .bash_profile
+
+# .bash_profile sourced at every login shell, and applies to the whole session.
+#
+# Its job is to set the path, run commands that should only be run once per 
+# session such as keyrings, handle eveything required for the session and all 
+# sub-shells.
+
+# Test for an interactive shell.  There is no need to set anything
+# past this point for scp and rcp, and it's important to refrain from
+# outputting anything in those cases.
+if [[ $- != *i* ]] ; then
+    # Shell is non-interactive.  Be done now!
+    return
+fi
+
+# These functions API are accessible to scripts in /etc/profile.d
+append_path () {
+    case ":$PATH:" in
+        *:"$1":*)
+            ;;
+        *)
+            PATH="${PATH:+$PATH:}$1"
+    esac
+}
+
+prepend_path () {
+    case ":$PATH:" in
+        *:"$1":*)
+            ;;
+        *)
+            PATH="$1:${PATH}"
+    esac
+}
+
+# Declare some preferences via global variables:
+export EDITOR=/usr/bin/nano
+export PAGER=/usr/bin/less
+export LANG=en_US.UTF-8
+
+# Disable quoting of file names in "ls" because, stupid...
+export QUOTING_STYLE=literal
+
+# Enable history timestamps
+HISTTIMEFORMAT="%F %T "
+
+# Disable logging commands prefixed with a space
+HISTCONTROL=ignorespace
+
+# It is intentional in the following line to use || instead of -o.
+# This way the evaluation can be short-circuited and calling whoami is
+# avoided.
+if [ "$EUID" = "0" ] || [ "$USER" = "root" ] ; then
+    PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:${ROOTPATH}"
+else
+    PATH="/usr/local/bin:/usr/bin:/bin:${PATH}"
+fi
+export PATH
+
+# Load profiles from /etc/profile.d to take advantage of specifics of the server
+if [ -d "/etc/profile.d" ] ; then
+    for profile in /etc/profile.d/*.sh; do
+        test -r "$profile" && . "$profile"
+    done
+    unset profile
+fi
+
+# SSH Agents are generally a Good Thing (tm)
+if [ -e "/usr/bin/keychain" ] ; then
+    eval $(keychain --eval --quiet --timeout 15)
+fi
+
+# Some additional paths, if they exist
+# Check for the Android SDK
+if [ -d "/opt/android-sdk/platform-tools" ] ; then
+    append_path "/opt/android-sdk/platform-tools"
+fi
+
+# If we have ccache, use it... It overrides some gcc binaries, so prepend it.
+if [ -d "/usr/lib/ccache/bin" ] ; then
+    prepend_path "/usr/lib/ccache/bin"
+fi
+
+# If we have ~/bin, use it...
+# I like to override commands from here, so we'll prepend it so it's last.
+if [ -d "$HOME/bin" ] ; then
+    prepend_path "$HOME/bin"
+fi
+
+unset -f append_path
+unset -f prepend_path
+
+# Lastly, we call .bashrc to handle the customization that should apply to all instances of interactive bash.
+if [ -f ~/.bashrc ] ; then
+    . ~/.bashrc
+fi

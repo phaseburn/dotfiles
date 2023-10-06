@@ -1,0 +1,4 @@
+README.md
+{{- if ne .chezmoi.fqdnHostname "gate.agiloft.com" }}
+bin/gekota-help.sh
+{{- end }}
