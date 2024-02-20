@@ -8,5 +8,5 @@ Install them with:
 Once they're installed, to set up for pushing changes:
 ```
 chezmoi cd
-git remote set-url origin git@github.com:phaseburn/dotfiles.git
+git remote set-url --push origin ssh://git@github/phaseburn/dotfiles.git
 ```
